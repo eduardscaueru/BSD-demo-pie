@@ -1,0 +1,17 @@
+[
+  {
+    "companyName": "Adobe",
+    "companyAbvr": "ADBE",
+    "price": 500.42
+  },
+  {
+    "companyName": "Apple",
+    "companyAbvr": "APPL",
+    "price": 134.17
+  },
+  {
+    "companyName": "Amazon",
+    "companyAbvr": "AMZN",
+    "price": 312.84
+  }
+]
