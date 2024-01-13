@@ -39,7 +39,7 @@ public class Pie {
 
         StringBuilder builder = new StringBuilder();
         Map<String, Double> gains = new HashMap<>();
-        pieSlices.forEach(slice -> gains.put(slice.companyAbvr(), slice.shares() * prices.get(slice.companyAbvr())));
+        pieSlices.forEach(slice -> gains.put(slice.companyAbvr(), slice.units() * prices.get(slice.companyAbvr())));
         Double sumGains = gains.values().stream().reduce(0.0, Double::sum);
 
         builder.append("Pie\n");
