@@ -1,16 +1,13 @@
-package com.example.demo;
+package com.example.demo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,7 +19,7 @@ public class PieSliceModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pie_slice_id", updatable = true, nullable = false)
+    @Column(name = "pie_slice_id", updatable = false, nullable = false)
     private Long pieSliceId;
 
     @Column(name = "user_id")
@@ -39,7 +36,9 @@ public class PieSliceModel {
 
     @Column(name = "shares")
     private Double shares;
+}
 
 //    @OneToMany(mappedBy = "user")
 //    private List<UserLogin> logins = new ArrayList<>();
-}
+
+

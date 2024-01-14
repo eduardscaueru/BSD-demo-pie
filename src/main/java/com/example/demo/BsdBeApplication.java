@@ -25,7 +25,7 @@ public class BsdBeApplication {
 			priceList.forEach(price -> prices.put(price.companyAbvr(), price.price()));
 			System.out.println("Prices " + prices);
 		} catch (IOException e) {
-
+			e.getMessage();
 		}
 
 		SpringApplication.run(BsdBeApplication.class, args);

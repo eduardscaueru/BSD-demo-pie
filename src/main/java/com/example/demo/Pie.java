@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import com.example.demo.model.PieSliceModel;
+
 import static com.example.demo.BsdBeApplication.prices;
 
 import java.util.ArrayList;
