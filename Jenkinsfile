@@ -7,7 +7,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo "Run tests"
-                sh "mvn clean verify"
+                sh "mvn clean verify -s .mvn/settings.xml"
             }
         }
     }
