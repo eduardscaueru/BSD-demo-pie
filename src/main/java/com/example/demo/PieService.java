@@ -1,7 +1,5 @@
 package com.example.demo;
 
-import static com.example.demo.BsdBeApplication.prices;
-
 import com.example.demo.model.PieSliceModel;
 import com.example.demo.model.UserModel;
 import com.example.demo.repository.PieSliceRepository;
@@ -12,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +37,11 @@ public class PieService {
                 .pieName(pieSlice.pie_name()).userId(pieSlice.user_id()).investedMoney(
                 pieSlice.invested_money()).ticker(pieSlice.ticker()).shares(pieSlice.shares()).build();
         pieSliceRepository.save(pieSliceModel);
+
+        UserModel currentUser = usersRepository.findByUserId(pieSlice.user_id());
+
+        currentUser.setBalance(currentUser.getBalance() - pieSlice.invested_money());
+        usersRepository.save(currentUser);
 
         // compute pie
         List<PieSliceModel> pieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
