@@ -98,7 +98,7 @@ public class PieService {
                 UserModel user = usersRepository.findByUserId(pieSliceSell.user_id());
                 Double gainedMoney = pieSliceSell.shares() * prices.get(pieSliceSell.ticker());
                 System.out.println("Gained money: " + gainedMoney);
-                user.setBalance(user.getBalance() - gainedMoney);
+                user.setBalance(user.getBalance() + gainedMoney);
                 usersRepository.save(user);
             });
 
