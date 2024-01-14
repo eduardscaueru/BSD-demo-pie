@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +30,34 @@ public class PieService {
 
     public Pie addSlice(String body) {
 
-        PieSlice pieSlice = null;
+        final PieSlice pieSlice;
         try {
             pieSlice = mapper.readValue(body, PieSlice.class);
         } catch (IOException e) {
             return new Pie();
+        }
+
+        List<PieSliceModel> pieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
+            pieSlice.user_id(), pieSlice.pie_name());
+        List<PieSliceModel> filterByTicker = pieSliceList.stream()
+            .filter(slice -> slice.getTicker().equals(pieSlice.ticker())).toList();
+        if (!filterByTicker.isEmpty()) {
+            PieSliceModel sliceToUpdate = filterByTicker.get(0);
+            sliceToUpdate.setInvestedMoney(sliceToUpdate.getInvestedMoney() + pieSlice.invested_money());
+            sliceToUpdate.setShares(sliceToUpdate.getShares() + pieSlice.shares());
+
+            pieSliceRepository.save(sliceToUpdate);
+
+            UserModel currentUser = usersRepository.findByUserId(pieSlice.user_id());
+            currentUser.setBalance(currentUser.getBalance() - pieSlice.invested_money());
+            usersRepository.save(currentUser);
+
+            List<PieSliceModel> updatedPieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
+                pieSlice.user_id(), pieSlice.pie_name());
+            Pie pie = new Pie();
+            pie.getPieSlices().addAll(updatedPieSliceList);
+
+            return pie;
         }
 
         //add to db;
@@ -42,16 +66,14 @@ public class PieService {
                 pieSlice.invested_money()).ticker(pieSlice.ticker()).shares(pieSlice.shares()).build();
         pieSliceRepository.save(pieSliceModel);
 
+        // update User balance
         UserModel currentUser = usersRepository.findByUserId(pieSlice.user_id());
-
         currentUser.setBalance(currentUser.getBalance() - pieSlice.invested_money());
         usersRepository.save(currentUser);
 
         // compute pie
-        List<PieSliceModel> pieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
-            pieSlice.user_id(), pieSlice.pie_name());
-
         Pie pie = new Pie();
+        pieSliceList.add(pieSliceModel);
         pie.getPieSlices().addAll(pieSliceList);
 
         return pie;
