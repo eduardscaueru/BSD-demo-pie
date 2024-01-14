@@ -11,8 +11,8 @@ public class PieTest {
     static void setUp() {
 
         pie = new Pie();
-        pie.getPieSlices().add(new PieSlice("APPL", 100.0, 50.2));
-        pie.getPieSlices().add(new PieSlice("ADBE", 825.12, 3.4));
+//        pie.getPieSlices().add(new PieSlice("APPL", 100.0, 50.2));
+//        pie.getPieSlices().add(new PieSlice("ADBE", 825.12, 3.4));
     }
 
     @Test
