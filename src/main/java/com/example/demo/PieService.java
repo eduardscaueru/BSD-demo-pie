@@ -1,11 +1,16 @@
 package com.example.demo;
 
+import static com.example.demo.BsdBeApplication.prices;
+
 import com.example.demo.model.PieSliceModel;
 import com.example.demo.model.UserModel;
 import com.example.demo.repository.PieSliceRepository;
 import com.example.demo.repository.UsersRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,17 +22,16 @@ public class PieService {
 
     @Autowired
     private PieSliceRepository pieSliceRepository;
-
     @Autowired
     private UsersRepository usersRepository;
 
-    public String addSlice(String body) {
+    public Pie addSlice(String body) {
 
         PieSlice pieSlice = null;
         try {
             pieSlice = mapper.readValue(body, PieSlice.class);
         } catch (IOException e) {
-            return "error";
+            return new Pie();
         }
 
         //add to db;
@@ -48,7 +52,7 @@ public class PieService {
         Pie pie = new Pie();
         pie.getPieSlices().addAll(pieSliceList);
 
-        return pie.toString();
+        return pie;
     }
 
     public Pie getPie(String name) {
@@ -59,6 +63,51 @@ public class PieService {
         pie.getPieSlices().addAll(pieSliceModels);
 
         System.out.println(pie.toString());
+
+        return pie;
+    }
+
+    public Pie sell(String body) throws JsonProcessingException {
+
+        List<PieSliceSell> pieSliceSellList = new ArrayList<>();
+        try {
+            pieSliceSellList = new ObjectMapper().readValue(
+                body,
+                new TypeReference<List<PieSliceSell>>() {
+                });
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw e;
+        }
+
+        pieSliceSellList
+            .forEach(pieSliceSell -> {
+                PieSliceModel pieSlice = pieSliceRepository.findPieSliceModelByPieSliceId(pieSliceSell.pie_slice_id());
+
+                // Sell whole slice
+                if (pieSliceSell.shares().equals(pieSlice.getShares())) {
+                    pieSliceRepository.delete(pieSlice);
+                } else if (pieSliceSell.shares() <= pieSlice.getShares()) {
+                    pieSlice.setShares(pieSlice.getShares() - pieSliceSell.shares());
+                    pieSliceRepository.save(pieSlice);
+                } else {
+                    throw new RuntimeException(String.format("You want to sell %,.4f shares but you have only %,.4f", pieSliceSell.shares(), pieSlice.getShares()));
+                }
+
+                // Update user balance
+                UserModel user = usersRepository.findByUserId(pieSliceSell.user_id());
+                Double gainedMoney = pieSliceSell.shares() * prices.get(pieSliceSell.ticker());
+                System.out.println("Gained money: " + gainedMoney);
+                user.setBalance(user.getBalance() + gainedMoney);
+                usersRepository.save(user);
+            });
+
+        // compute pie
+        List<PieSliceModel> pieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
+            pieSliceSellList.get(0).user_id(), pieSliceSellList.get(0).pie_name());
+
+        Pie pie = new Pie();
+        pie.getPieSlices().addAll(pieSliceList);
 
         return pie;
     }

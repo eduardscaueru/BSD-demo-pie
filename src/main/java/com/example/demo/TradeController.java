@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,14 +22,25 @@ public class TradeController {
     @Autowired
     private PieService pieService;
 
-    @PostMapping("/pie")
-    public ResponseEntity<String> addSlice(@RequestBody String body) {
+    @PostMapping("/pie/buy")
+    public ResponseEntity<Pie> addSlice(@RequestBody String body) {
 
         System.out.println("Pie: " + body);
         return ResponseEntity.ok(pieService.addSlice(body));
     }
 
-    @PostMapping("/pie/{name}")
+    @PostMapping("/pie/sell")
+    public ResponseEntity<Pie> sellFromPie(@RequestBody String body) {
+
+        System.out.println("Pie: " + body);
+        try {
+            return ResponseEntity.ok(pieService.sell(body));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new Pie());
+        }
+    }
+
+    @GetMapping("/pie/{name}")
     public ResponseEntity<Pie> getPie(@PathVariable String name) {
 
         return ResponseEntity.ok(pieService.getPie(name));
@@ -38,7 +50,7 @@ public class TradeController {
     public ResponseEntity<String> updatePrices(@RequestBody String body) {
 
         try {
-            System.out.println(body);
+//            System.out.println(body);
             List<Price> priceList = new ObjectMapper().readValue(
                 body,
                 new TypeReference<List<Price>>() {
