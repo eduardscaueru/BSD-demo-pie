@@ -1,4 +1,6 @@
 package com.example.demo;
 
-public record Price(String companyName, String companyAbvr, Double price) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record Price(@JsonProperty("Company Name") String companyName, @JsonProperty("Company Abvr") String companyAbvr, @JsonProperty("Price") Double price) {
 }

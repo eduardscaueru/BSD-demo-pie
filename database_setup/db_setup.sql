@@ -1,3 +1,6 @@
+CREATE USER admin WITH LOGIN SUPERUSER CREATEDB CREATEROLE;
+ALTER USER admin WITH PASSWORD 'admin';
+
 create database users;
 
 \connect users;
@@ -17,22 +20,18 @@ CREATE  TABLE user_login (
 );
 
 CREATE TABLE pie_slice_table(
-                                   pie_slice_id SERIAL PRIMARY KEY,
-                                   ticker varchar(10),
-                                   invested_money FLOAT,
-                                   shares FLOAT
+                                user_id INTEGER REFERENCES user_table(user_id),
+                                pie_name varchar(255),
+                                pie_slice_id SERIAL PRIMARY KEY,
+                                ticker varchar(10),
+                                invested_money FLOAT,
+                                shares FLOAT
 );
 
-CREATE TABLE pie(
-                                   pie_slice_id INTEGER REFERENCES pie_slice_table(pie_slice_id),
-                                   pie_name varchar(255),
-                                   user_id INTEGER REFERENCES user_table(user_id)
-);
-
-CREATE  TABLE trade_info(
+CREATE TABLE trade_info(
                             trade_id SERIAL PRIMARY KEY,
                             user_id INTEGER REFERENCES user_table(user_id),
-                            pie_id INTEGER REFERENCES pie(pie_id),
+                            pie_name INTEGER REFERENCES pie(pie_name),
                             stock_name varchar(255),
                             ticker varchar(10),
                             buy_sell varchar(5),
@@ -40,14 +39,23 @@ CREATE  TABLE trade_info(
                             shares FLOAT,
                             timestamp INTEGER
 );
-
-ALTER TABLE pie ADD PRIMARY KEY (pie_slice_id, pie_name);
-
-CREATE ROLE new_user LOGIN PASSWORD 'new_user_password';
-REVOKE CONNECT ON DATABASE users  FROM PUBLIC;
-GRANT USAGE ON SCHEMA public TO new_user;
-GRANT ALL PRIVILEGES ON DATABASE users TO new_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO new_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO new_user;
-
+-- CREATE ROLE new_user LOGIN PASSWORD 'new_user_password';
+--
+-- REVOKE CONNECT ON DATABASE users  FROM PUBLIC;
+-- GRANT CONNECT on DATABASE users  TO new_user;
+--
+-- GRANT USAGE ON SCHEMA public TO new_user;
+--
+-- GRANT ALL PRIVILEGES ON DATABASE users TO new_user;
+-- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO new_user;
+-- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO new_user;
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO new_user;
+-- GRANT SELECT ON ALL TABLES IN SCHEMA public TO new_user;
+--
+-- psql -U new_user -d users
+--
+-- GRANT ALL ON TABLE public.users TO "new_user";
+--
+-- GRANT "postgres" TO "User1";
+--
 INSERT INTO user_table (user_name , email , password) VALUES ('admin', 'admin@admin.com', 'admin');
