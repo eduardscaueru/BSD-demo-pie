@@ -9,7 +9,8 @@ CREATE   TABLE user_table (
                               user_id SERIAL PRIMARY KEY,
                               user_name varchar(255),
                               email varchar(255),
-                              password varchar(255)
+                              password varchar(255),
+                              balance FLOAT
 );
 
 CREATE  TABLE user_login (

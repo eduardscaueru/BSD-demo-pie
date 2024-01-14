@@ -2,6 +2,7 @@ package com.example.demo;
 
 import static com.example.demo.BsdBeApplication.prices;
 
+import com.example.demo.model.PieSliceModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +11,6 @@ import java.util.Map;
 public class Pie {
 
     List<PieSliceModel> pieSlices;
-    String pie_name;
-    String user_id;
 
     public Pie() {
         pieSlices = new ArrayList<>();
