@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import static com.example.demo.BsdBeApplication.prices;
+
 import com.example.demo.model.PieSliceModel;
 import com.example.demo.model.UserModel;
 import com.example.demo.repository.PieSliceRepository;
