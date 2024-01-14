@@ -31,7 +31,7 @@ CREATE TABLE pie_slice_table(
 CREATE TABLE trade_info(
                             trade_id SERIAL PRIMARY KEY,
                             user_id INTEGER REFERENCES user_table(user_id),
-                            pie_name INTEGER REFERENCES pie(pie_name),
+                            pie_name varchar(255),
                             stock_name varchar(255),
                             ticker varchar(10),
                             buy_sell varchar(5),
