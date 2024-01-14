@@ -11,7 +11,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -110,5 +112,31 @@ public class PieService {
         pie.getPieSlices().addAll(pieSliceList);
 
         return pie;
+    }
+
+    public List<Pie> getAllUserPies(Long userId) {
+
+        List<PieSliceModel> pieSliceModels = pieSliceRepository.findAllByUserId(userId);
+        Map<String, List<PieSliceModel>> piesMap = new HashMap<>();
+
+        pieSliceModels.forEach(pieSliceModel -> {
+            if (!piesMap.containsKey(pieSliceModel.getPieName())) {
+                List<PieSliceModel> pieSlices = new ArrayList<>();
+                pieSlices.add(pieSliceModel);
+
+                piesMap.put(pieSliceModel.getPieName(), pieSlices);
+            } else {
+                piesMap.get(pieSliceModel.getPieName()).add(pieSliceModel);
+            }
+        });
+
+        List<Pie> pies = new ArrayList<>();
+        piesMap.values().forEach(slices -> {
+            Pie pie = new Pie();
+            pie.getPieSlices().addAll(slices);
+            pies.add(pie);
+        });
+
+        return pies;
     }
 }

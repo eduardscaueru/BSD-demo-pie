@@ -16,4 +16,6 @@ public interface PieSliceRepository extends JpaRepository<PieSliceModel, Long> {
 
     @Query("SELECT p FROM PieSliceModel p WHERE p.pieName = ?1")
     public List<PieSliceModel> findAllByPieName(String pieName);
+
+    public List<PieSliceModel> findAllByUserId(Long userId);
 }
