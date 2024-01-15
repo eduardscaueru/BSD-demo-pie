@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,41 +53,30 @@ public class PieService {
 
             List<PieSliceModel> updatedPieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
                 pieSlice.user_id(), pieSlice.pie_name());
-            Pie pie = new Pie();
-            pie.getPieSlices().addAll(updatedPieSliceList);
 
-            return pie;
+            return computePie(updatedPieSliceList);
         }
 
         //add to db;
-        PieSliceModel pieSliceModel = PieSliceModel.builder().pieSliceId(pieSlice.pie_slice_id())
+        PieSliceModel pieSliceModelSave = PieSliceModel.builder().pieSliceId(pieSlice.pie_slice_id())
                 .pieName(pieSlice.pie_name()).userId(pieSlice.user_id()).investedMoney(
                 pieSlice.invested_money()).ticker(pieSlice.ticker()).shares(pieSlice.shares()).build();
-        pieSliceRepository.save(pieSliceModel);
+        pieSliceRepository.save(pieSliceModelSave);
 
         // update User balance
         UserModel currentUser = usersRepository.findByUserId(pieSlice.user_id());
         currentUser.setBalance(currentUser.getBalance() - pieSlice.invested_money());
         usersRepository.save(currentUser);
 
-        // compute pie
-        Pie pie = new Pie();
-        pieSliceList.add(pieSliceModel);
-        pie.getPieSlices().addAll(pieSliceList);
-
-        return pie;
+        pieSliceList.add(pieSliceModelSave);
+        return computePie(pieSliceList);
     }
 
     public Pie getPie(String name) {
 
         List<PieSliceModel> pieSliceModels = pieSliceRepository.findAllByPieName(name);
 
-        Pie pie = new Pie();
-        pie.getPieSlices().addAll(pieSliceModels);
-
-        System.out.println(pie.toString());
-
-        return pie;
+        return computePie(pieSliceModels);
     }
 
     public Pie sell(String body) throws JsonProcessingException {
@@ -130,16 +118,14 @@ public class PieService {
         List<PieSliceModel> pieSliceList = pieSliceRepository.findAllByUserIdAndPieName(
             pieSliceSellList.get(0).user_id(), pieSliceSellList.get(0).pie_name());
 
-        Pie pie = new Pie();
-        pie.getPieSlices().addAll(pieSliceList);
-
-        return pie;
+        return computePie(pieSliceList);
     }
 
     public List<Pie> getAllUserPies(Long userId) {
 
         List<PieSliceModel> pieSliceModels = pieSliceRepository.findAllByUserId(userId);
         Map<String, List<PieSliceModel>> piesMap = new HashMap<>();
+        Map<String, Double> piesSumGainsMap = new HashMap<>();
 
         pieSliceModels.forEach(pieSliceModel -> {
             if (!piesMap.containsKey(pieSliceModel.getPieName())) {
@@ -152,13 +138,51 @@ public class PieService {
             }
         });
 
+        piesMap.forEach((key, value) -> piesSumGainsMap.put(key, value.stream()
+            .mapToDouble(slice -> slice.getShares() * prices.get(slice.getTicker()))
+            .sum()));
+
         List<Pie> pies = new ArrayList<>();
-        piesMap.values().forEach(slices -> {
+        piesMap.forEach((pieName, slices) -> {
             Pie pie = new Pie();
-            pie.getPieSlices().addAll(slices);
+            List<PieSlice> pieSlices = new ArrayList<>(slices.stream()
+                .map(pieSliceModel -> PieSlice.builder()
+                    .user_id(pieSliceModel.getUserId())
+                    .pie_slice_id(pieSliceModel.getPieSliceId())
+                    .pie_name(pieSliceModel.getPieName())
+                    .ticker(pieSliceModel.getTicker())
+                    .invested_money(pieSliceModel.getInvestedMoney())
+                    .shares(pieSliceModel.getShares())
+                    .gainsPercentage(
+                        pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker())
+                            / piesSumGainsMap.get(pieName))
+                    .build()).toList());
+            pie.getPieSlices().addAll(pieSlices);
             pies.add(pie);
         });
 
         return pies;
+    }
+
+    private Pie computePie(List<PieSliceModel> pieSliceList) {
+
+        double sumGains = pieSliceList.stream()
+            .mapToDouble(slice -> slice.getShares() * prices.get(slice.getTicker()))
+            .sum();
+
+        Pie pie = new Pie();
+        List<PieSlice> pieSlices = new ArrayList<>(pieSliceList.stream()
+            .map(pieSliceModel -> PieSlice.builder()
+                .user_id(pieSliceModel.getUserId())
+                .pie_slice_id(pieSliceModel.getPieSliceId())
+                .pie_name(pieSliceModel.getPieName())
+                .ticker(pieSliceModel.getTicker())
+                .invested_money(pieSliceModel.getInvestedMoney())
+                .shares(pieSliceModel.getShares())
+                .gainsPercentage(pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker()) / sumGains)
+                .build()).toList());
+        pie.getPieSlices().addAll(pieSlices);
+
+        return pie;
     }
 }
