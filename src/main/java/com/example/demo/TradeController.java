@@ -2,6 +2,7 @@ package com.example.demo;
 
 import static com.example.demo.BsdBeApplication.prices;
 
+import com.example.demo.model.SingleStockTransactionModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -70,5 +71,19 @@ public class TradeController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/stocks/buy")
+    public ResponseEntity<SingleStockTransaction> buyStock(@RequestBody String body) {
+
+        System.out.println("Stock: " + body);
+        return ResponseEntity.ok(pieService.addStock(body));
+    }
+
+    @PostMapping("/stocks/sell")
+    public ResponseEntity<SingleStockTransaction> sellStock(@RequestBody String body) {
+
+        System.out.println("Stock: " + body);
+        return ResponseEntity.ok(pieService.sellStock(body));
     }
 }

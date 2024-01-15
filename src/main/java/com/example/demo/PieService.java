@@ -3,8 +3,10 @@ package com.example.demo;
 import static com.example.demo.BsdBeApplication.prices;
 
 import com.example.demo.model.PieSliceModel;
+import com.example.demo.model.SingleStockTransactionModel;
 import com.example.demo.model.UserModel;
 import com.example.demo.repository.PieSliceRepository;
+import com.example.demo.repository.TradeInfoRepository;
 import com.example.demo.repository.UsersRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,6 +28,8 @@ public class PieService {
     private PieSliceRepository pieSliceRepository;
     @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private TradeInfoRepository tradeInfoRepository;
 
     public Pie addSlice(String body) {
 
@@ -185,4 +189,64 @@ public class PieService {
 
         return pie;
     }
+
+    public SingleStockTransaction addStock(String body) {
+        final SingleStockTransaction singleStockTransaction;
+        try {
+            singleStockTransaction = mapper.readValue(body, SingleStockTransaction.class);
+        } catch (IOException e) {
+            System.out.println("mapping error");
+            return new SingleStockTransaction(-1L, (long) -1L, "err", "err", "err", "err", -1.0, -1.0, 1L);
+        }
+
+        SingleStockTransactionModel model = SingleStockTransactionModel.builder()
+                .buySell("BUY")
+                .ticker(singleStockTransaction.ticker())
+                .stockName(singleStockTransaction.stock_name())
+                .tradeId(singleStockTransaction.trade_id())
+                .pieName("INDIVIDUAL")
+                .userId(singleStockTransaction.user_id())
+                .timestamp(singleStockTransaction.timestamp())
+                .shares(singleStockTransaction.shares())
+                .value(singleStockTransaction.value())
+                .build();
+
+        tradeInfoRepository.save(model);
+        UserModel user = usersRepository.findByUserId(singleStockTransaction.user_id());
+        user.setBalance(user.getBalance() - model.getValue() * model.getShares());
+        usersRepository.save(user);
+
+        return singleStockTransaction;
+
+    }
+
+    public SingleStockTransaction sellStock(String body) {
+        final SingleStockTransaction singleStockTransaction;
+        try {
+            singleStockTransaction = mapper.readValue(body, SingleStockTransaction.class);
+        } catch (IOException e) {
+            System.out.println("mapping error");
+            return new SingleStockTransaction(-1L, (long) -1L, "err", "err", "err", "err", -1.0, -1.0, 1L);
+        }
+
+        SingleStockTransactionModel model = SingleStockTransactionModel.builder()
+                .buySell("SELL")
+                .ticker(singleStockTransaction.ticker())
+                .stockName(singleStockTransaction.stock_name())
+                .tradeId(singleStockTransaction.trade_id())
+                .pieName("INDIVIDUAL")
+                .userId(singleStockTransaction.user_id())
+                .timestamp(singleStockTransaction.timestamp())
+                .shares(singleStockTransaction.shares())
+                .value(singleStockTransaction.value())
+                .build();
+
+        tradeInfoRepository.save(model);
+        UserModel user = usersRepository.findByUserId(singleStockTransaction.user_id());
+        user.setBalance(user.getBalance() + model.getValue() * model.getShares());
+        usersRepository.save(user);
+
+        return singleStockTransaction;
+    }
 }
+
