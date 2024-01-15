@@ -153,9 +153,8 @@ public class PieService {
                     .ticker(pieSliceModel.getTicker())
                     .invested_money(pieSliceModel.getInvestedMoney())
                     .shares(pieSliceModel.getShares())
-                    .gainsPercentage(
-                        pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker())
-                            / piesSumGainsMap.get(pieName))
+                    .gainsPercentage(pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker()) / piesSumGainsMap.get(pieName))
+                    .gainsMoney(pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker()))
                     .build()).toList());
             pie.getPieSlices().addAll(pieSlices);
             pies.add(pie);
@@ -180,6 +179,7 @@ public class PieService {
                 .invested_money(pieSliceModel.getInvestedMoney())
                 .shares(pieSliceModel.getShares())
                 .gainsPercentage(pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker()) / sumGains)
+                .gainsMoney(pieSliceModel.getShares() * prices.get(pieSliceModel.getTicker()))
                 .build()).toList());
         pie.getPieSlices().addAll(pieSlices);
 
