@@ -74,16 +74,16 @@ public class TradeController {
     }
 
     @PostMapping("/stocks/buy")
-    public ResponseEntity<UserTotalShares> buyStock(@RequestBody String body) {
+    public ResponseEntity<String> buyStock(@RequestBody String body) {
 
         System.out.println("Stock: " + body);
-        return ResponseEntity.ok(pieService.addStock(body));
+        return ResponseEntity.ok(pieService.addStock(body).toString());
     }
 
     @PostMapping("/stocks/sell")
-    public ResponseEntity<UserTotalShares> sellStock(@RequestBody String body) {
+    public ResponseEntity<String> sellStock(@RequestBody String body) {
 
         System.out.println("Stock: " + body);
-        return ResponseEntity.ok(pieService.sellStock(body));
+        return ResponseEntity.ok(pieService.sellStock(body).toString());
     }
 }

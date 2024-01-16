@@ -11,4 +11,14 @@ public class UserTotalShares {
         this.value = value;
         this.balance = balance;
     }
+
+    @Override
+    public String toString() {
+        String val = "UserDetails: {\n";
+        val += "\t\"shares\":" + Double.toString(shares) + ",\n";
+        val += "\t\"value\":" + Double.toString(value) + ",\n";
+        val += "\t\"balance\":" + Double.toString(balance) + "\n";
+        val += "}";
+        return val;
+    }
 }

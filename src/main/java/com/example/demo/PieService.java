@@ -228,7 +228,9 @@ public class PieService {
             shares -= sell.getShares();
             value -= sell.getShares() * sell.getValue();
         }
-        return new UserTotalShares(shares, value, balance);
+        UserTotalShares uts = new UserTotalShares(shares, value, balance);
+        System.out.println(uts);
+        return uts;
 
     }
 
