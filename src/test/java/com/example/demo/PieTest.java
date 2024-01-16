@@ -30,8 +30,8 @@ public class PieTest {
         }
 
         pie = new Pie();
-        pie.getPieSlices().add(new PieSliceModel(2L, 1L, "PieName", "AAPL", 100.0, 50.2));
-        pie.getPieSlices().add(new PieSliceModel(1L, 1L, "PieName", "ADBE", 825.12, 3.4));
+        //pie.getPieSlices().add(new PieSliceModel(2L, 1L, "PieName", "AAPL", 100.0, 50.2));
+        //pie.getPieSlices().add(new PieSliceModel(1L, 1L, "PieName", "ADBE", 825.12, 3.4));
     }
 
     @Test

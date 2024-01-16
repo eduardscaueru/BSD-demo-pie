@@ -190,13 +190,13 @@ public class PieService {
         return pie;
     }
 
-    public SingleStockTransaction addStock(String body) {
+    public UserTotalShares addStock(String body) {
         final SingleStockTransaction singleStockTransaction;
         try {
             singleStockTransaction = mapper.readValue(body, SingleStockTransaction.class);
         } catch (IOException e) {
             System.out.println("mapping error");
-            return new SingleStockTransaction(-1L, (long) -1L, "err", "err", "err", "err", -1.0, -1.0, 1L);
+            return null;
         }
 
         SingleStockTransactionModel model = SingleStockTransactionModel.builder()
@@ -213,20 +213,32 @@ public class PieService {
 
         tradeInfoRepository.save(model);
         UserModel user = usersRepository.findByUserId(singleStockTransaction.user_id());
-        user.setBalance(user.getBalance() - model.getValue() * model.getShares());
+        Double balance = user.getBalance() - model.getValue() * model.getShares();
+        user.setBalance(balance);
         usersRepository.save(user);
+        List<SingleStockTransactionModel> transactionsBuy = tradeInfoRepository.findAllByUserIdAndTickerAndBuySell(singleStockTransaction.user_id(), singleStockTransaction.ticker(), "BUY");
+        List<SingleStockTransactionModel> transactionsSell = tradeInfoRepository.findAllByUserIdAndTickerAndBuySell(singleStockTransaction.user_id(), singleStockTransaction.ticker(),  "SELL");
 
-        return singleStockTransaction;
+        double shares = 0.0, value = 0.0;
+        for(var buy: transactionsBuy) {
+            shares += buy.getShares();
+            value += buy.getShares() * buy.getValue();
+        }
+        for(var sell: transactionsSell) {
+            shares -= sell.getShares();
+            value -= sell.getShares() * sell.getValue();
+        }
+        return new UserTotalShares(shares, value, balance);
 
     }
 
-    public SingleStockTransaction sellStock(String body) {
+    public UserTotalShares sellStock(String body) {
         final SingleStockTransaction singleStockTransaction;
         try {
             singleStockTransaction = mapper.readValue(body, SingleStockTransaction.class);
         } catch (IOException e) {
             System.out.println("mapping error");
-            return new SingleStockTransaction(-1L, (long) -1L, "err", "err", "err", "err", -1.0, -1.0, 1L);
+            return null;
         }
 
         SingleStockTransactionModel model = SingleStockTransactionModel.builder()
@@ -243,10 +255,23 @@ public class PieService {
 
         tradeInfoRepository.save(model);
         UserModel user = usersRepository.findByUserId(singleStockTransaction.user_id());
-        user.setBalance(user.getBalance() + model.getValue() * model.getShares());
+        Double balance = user.getBalance() + model.getValue() * model.getShares();
+        user.setBalance(balance);
         usersRepository.save(user);
 
-        return singleStockTransaction;
+        List<SingleStockTransactionModel> transactionsBuy = tradeInfoRepository.findAllByUserIdAndTickerAndBuySell(singleStockTransaction.user_id(), singleStockTransaction.ticker(), "BUY");
+        List<SingleStockTransactionModel> transactionsSell = tradeInfoRepository.findAllByUserIdAndTickerAndBuySell(singleStockTransaction.user_id(), singleStockTransaction.ticker(),  "SELL");
+
+        double shares = 0.0, value = 0.0;
+        for(var buy: transactionsBuy) {
+            shares += buy.getShares();
+            value += buy.getShares() * buy.getValue();
+        }
+        for(var sell: transactionsSell) {
+            shares -= sell.getShares();
+            value -= sell.getShares() * sell.getValue();
+        }
+        return new UserTotalShares(shares, value, balance);
     }
 }
 
